@@ -1,0 +1,5 @@
+{
+  "name": "auditoria-vivienda",
+  "description": "Audita el modelo de riesgo de credito por tipo de vivienda y revisa si hay sesgos entre subgrupos.",
+  "version": "0.1.0"
+}
