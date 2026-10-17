@@ -1,11 +1,11 @@
-"""Comandos reutilizables del proyecto.  Uso:  python tareas.py evaluar | auditar | probar"""
+"""Comandos reutilizables del proyecto.  Uso:  python tareas.py evaluar | auditar | probar | auditar_vivienda"""
 import subprocess
 import sys
 
 import pandas as pd
 from sklearn.model_selection import cross_val_score, StratifiedKFold   # validación cruzada (Clase 6)
 
-from datos import cargar_datos
+from datos import cargar_datos, VIVIENDA
 from predictor import entrenar_predictor
 
 
@@ -31,12 +31,21 @@ def auditar():
           .agg(exactitud="mean", casos="count").round(2))
 
 
+def auditar_vivienda():
+    """Exactitud por tipo de vivienda, sobre los casos de prueba."""
+    predictor, X_pru, y_pru = entrenar_predictor()
+    acierto = predictor.predict(X_pru) == y_pru.values
+    vivienda = X_pru["housing"].map(VIVIENDA)
+    print(X_pru.assign(acierto=acierto, vivienda=vivienda).groupby("vivienda", observed=True)["acierto"]
+          .agg(exactitud="mean", casos="count").round(2))
+
+
 def probar():
     """Ejecuta las pruebas automáticas."""
     sys.exit(subprocess.call([sys.executable, "-m", "pytest", "-q"]))
 
 
-COMANDOS = {"evaluar": evaluar, "auditar": auditar, "probar": probar}
+COMANDOS = {"evaluar": evaluar, "auditar": auditar, "auditar_vivienda": auditar_vivienda, "probar": probar}
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in COMANDOS:
