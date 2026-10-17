@@ -2,6 +2,7 @@
 
 Uso:  python verificar.py <número de TODO>      Ejemplo:  python verificar.py 2
 """
+import random
 import sys
 
 ARCHIVOS = {1: "predictor.py", 2: "predictor.py", 3: "red_neuronal.py", 4: "red_neuronal.py", 5: "explicador.py",
@@ -18,8 +19,9 @@ def verificar(n):
     elif n == 2:
         from predictor import entrenar_predictor, probabilidad_malo
         predictor, X_pru, _ = entrenar_predictor()
-        p = probabilidad_malo(predictor, X_pru, 0)
-        print("Probabilidad de crédito malo del primer caso:", round(p, 2))
+        indice = random.randint(0, len(X_pru) - 1)
+        p = probabilidad_malo(predictor, X_pru, indice)
+        print(f"Probabilidad de crédito malo del caso {indice}:", round(p, 2))
         print("DEBE VERSE: un número entre 0 y 1")
     elif n in (3, 4):
         from datos import cargar_datos
