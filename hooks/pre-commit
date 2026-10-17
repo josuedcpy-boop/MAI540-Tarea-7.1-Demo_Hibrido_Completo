@@ -9,3 +9,9 @@ if [ $? -ne 0 ]; then
   echo "Las pruebas fallaron: commit cancelado."
   exit 1
 fi
+
+echo "Comprobando que README.md existe..."
+if [ ! -f "README.md" ]; then
+  echo "Falta README.md: commit cancelado."
+  exit 1
+fi
