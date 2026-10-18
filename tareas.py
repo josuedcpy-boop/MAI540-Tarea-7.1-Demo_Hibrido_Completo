@@ -1,4 +1,4 @@
-"""Comandos reutilizables del proyecto.  Uso:  python tareas.py evaluar | auditar | probar | auditar_vivienda"""
+"""Comandos reutilizables del proyecto.  Uso:  python tareas.py evaluar | auditar | probar | auditar_vivienda | auditar_explicaciones"""
 import subprocess
 import sys
 
@@ -45,7 +45,35 @@ def probar():
     sys.exit(subprocess.call([sys.executable, "-m", "pytest", "-q"]))
 
 
-COMANDOS = {"evaluar": evaluar, "auditar": auditar, "auditar_vivienda": auditar_vivienda, "probar": probar}
+def auditar_explicaciones(n=12):
+    """Genera explicaciones reales y muestra solo las que rechazan las dos reglas nuevas
+    (coherencia con los datos de la solicitud, y tono en la banda media 30%-60%)."""
+    from datos import datos_legibles
+    from explicador import cargar_modelo_lenguaje, explicar, recortar_a_oracion
+    from predictor import probabilidad_malo
+    from verificador import verificar_coherencia_datos, verificar_tono_medio
+
+    predictor, X_pru, y_pru = entrenar_predictor()
+    print("Cargando el modelo de lenguaje...")
+    tokenizador, modelo = cargar_modelo_lenguaje()
+
+    encontradas = 0
+    for i in range(n):
+        datos = datos_legibles(X_pru.iloc[i])
+        prob = probabilidad_malo(predictor, X_pru, i)
+        texto = recortar_a_oracion(explicar(tokenizador, modelo, datos, prob))
+        solo_nuevas = verificar_coherencia_datos(texto, datos) + verificar_tono_medio(texto, prob)
+        if solo_nuevas:
+            encontradas += 1
+            print(f"\n--- Solicitud {i + 1} | probabilidad: {prob:.0%} ---")
+            print("Texto:", texto)
+            print("Rechazada por reglas nuevas:", "; ".join(solo_nuevas))
+
+    print(f"\n{encontradas} de {n} solicitudes fallaron por las reglas nuevas.")
+
+
+COMANDOS = {"evaluar": evaluar, "auditar": auditar, "auditar_vivienda": auditar_vivienda, "probar": probar,
+            "auditar_explicaciones": auditar_explicaciones}
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in COMANDOS:

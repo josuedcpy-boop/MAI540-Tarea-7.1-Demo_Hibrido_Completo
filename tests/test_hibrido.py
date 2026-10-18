@@ -38,3 +38,17 @@ def test_explicacion_segura_solo_cita_lo_permitido():
 def test_probabilidad_entre_cero_y_uno():
     predictor, X_pru, _ = entrenar_predictor()
     assert 0.0 <= probabilidad_malo(predictor, X_pru, 0) <= 1.0
+
+
+def test_detecta_vivienda_inconsistente():
+ # DATOS dice "alquilada"; el texto afirma "propia"
+ texto = "El modelo estima 78% de probabilidad de crédito malo. La vivienda es propia."
+ problemas = verificar_explicacion(texto, DATOS, 0.78)
+ assert any("vivienda" in p for p in problemas)
+
+
+def test_detecta_tono_medio_incoherente():
+ # 45% es riesgo medio, no alto
+ texto = "La probabilidad es de 45%, lo cual es un riesgo alto."
+ problemas = verificar_explicacion(texto, {"edad": 30}, 0.45)
+ assert any("media" in p for p in problemas)
